@@ -3,7 +3,7 @@
 ## Author: Solao Bajiuik
 ## Version: 1.0
 ## Notes: A tool to help you with your auction house needs.
-## SavedVariables: SolorahLogs, SolorahAuctionDatabase
+## SavedVariablesPerCharacter: SolorahLogs, SolorahAuctionDatabase
 
 
 Solorah.lua

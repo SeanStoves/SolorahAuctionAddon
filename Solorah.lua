@@ -3,9 +3,6 @@ if not SolorahLogs then
     SolorahLogs = {}
 end
 
--- Get the current realm name and construct a unique saved variable name for the realm
-local realm = GetRealmName()
-
 -- Log levels
 local LOG_LEVELS = {INFO = 1, DEBUG = 2, ERROR = 3}
 
@@ -29,9 +26,6 @@ end
 
 if not SolorahAuctionDatabase then
     SolorahAuctionDatabase = {}
-    if not SolorahAuctionDatabase[realm] then
-        SolorahAuctionDatabase[realm] = {}
-    end
 end
 
 -- Create a frame to listen for events and register the necessary events
@@ -87,12 +81,12 @@ local function CreateMainFrame()
     -- Function to update the auction database statistics
     local function UpdateAuctionStats()
         local stats = "Auction Database Statistics:\n"
-        stats = stats .. "Total Items: " .. (SolorahAuctionDatabase[realm].TotalItems or 0) .. "\n"
-        stats = stats .. "Total Buyout Gold: " .. (SolorahAuctionDatabase[realm].TotalBuyoutGold or 0) .. "\n"
-        stats = stats .. "Total Bid Gold: " .. (SolorahAuctionDatabase[realm].TotalBidGold or 0) .. "\n"
-        stats = stats .. "Total Items Last Scan: " .. (SolorahAuctionDatabase[realm].TotalItemsLastScan or 0) .. "\n"
-        stats = stats .. "Total Buyout Gold Last Scan: " .. (SolorahAuctionDatabase[realm].TotalBuyoutGoldLastScan or 0) .. "\n"
-        stats = stats .. "Total Bid Gold Last Scan: " .. (SolorahAuctionDatabase[realm].TotalBidGoldLastScan or 0) .. "\n"
+        stats = stats .. "Total Items: " .. (SolorahAuctionDatabase.TotalItems or 0) .. "\n"
+        stats = stats .. "Total Buyout Gold: " .. (SolorahAuctionDatabase.TotalBuyoutGold or 0) .. "\n"
+        stats = stats .. "Total Bid Gold: " .. (SolorahAuctionDatabase.TotalBidGold or 0) .. "\n"
+        stats = stats .. "Total Items Last Scan: " .. (SolorahAuctionDatabase.TotalItemsLastScan or 0) .. "\n"
+        stats = stats .. "Total Buyout Gold Last Scan: " .. (SolorahAuctionDatabase.TotalBuyoutGoldLastScan or 0) .. "\n"
+        stats = stats .. "Total Bid Gold Last Scan: " .. (SolorahAuctionDatabase.TotalBidGoldLastScan or 0) .. "\n"
 
         statsText:SetText(stats)
         mainFrame.scrollFrame:SetVerticalScroll(0) -- Reset the scroll position to the top
@@ -121,12 +115,12 @@ local function CreateMainFrame()
         local TotalBuyoutGoldLastScan = 0 -- Initialize the total buyout gold for the last scan
         local TotalBidGoldLastScan = 0 -- Initialize the total bid gold for the last scan
 
-        SolorahAuctionDatabase[realm].TotalItemsLastScan = (SolorahAuctionDatabase[realm].TotalItemsLastScan or 0) + math.max(TotalItemsLastScan, 1)
-        SolorahAuctionDatabase[realm].TotalBuyoutGoldLastScan = (SolorahAuctionDatabase[realm].TotalBuyoutGoldLastScan or 0) + math.max(TotalBuyoutGoldLastScan, 1)
-        SolorahAuctionDatabase[realm].TotalBidGoldLastScan = (SolorahAuctionDatabase[realm].TotalBidGoldLastScan or 0) + math.max(TotalBidGoldLastScan, 1)
-        SolorahAuctionDatabase[realm].TotalItems = SolorahAuctionDatabase[realm].TotalItems and (SolorahAuctionDatabase[realm].TotalItems + TotalItemsLastScan) or TotalItemsLastScan
-        SolorahAuctionDatabase[realm].TotalBuyoutGold = SolorahAuctionDatabase[realm].TotalBuyoutGold and (SolorahAuctionDatabase[realm].TotalBuyoutGold + TotalBuyoutGoldLastScan) or TotalBuyoutGoldLastScan
-        SolorahAuctionDatabase[realm].TotalBidGold = SolorahAuctionDatabase[realm].TotalBidGold and (SolorahAuctionDatabase[realm].TotalBidGold + TotalBidGoldLastScan) or TotalBidGoldLastScan
+        SolorahAuctionDatabase.TotalItemsLastScan = (SolorahAuctionDatabase.TotalItemsLastScan or 0) + math.max(TotalItemsLastScan, 1)
+        SolorahAuctionDatabase.TotalBuyoutGoldLastScan = (SolorahAuctionDatabase.TotalBuyoutGoldLastScan or 0) + math.max(TotalBuyoutGoldLastScan, 1)
+        SolorahAuctionDatabase.TotalBidGoldLastScan = (SolorahAuctionDatabase.TotalBidGoldLastScan or 0) + math.max(TotalBidGoldLastScan, 1)
+        SolorahAuctionDatabase.TotalItems = SolorahAuctionDatabase.TotalItems and (SolorahAuctionDatabase.TotalItems + TotalItemsLastScan) or TotalItemsLastScan
+        SolorahAuctionDatabase.TotalBuyoutGold = SolorahAuctionDatabase.TotalBuyoutGold and (SolorahAuctionDatabase.TotalBuyoutGold + TotalBuyoutGoldLastScan) or TotalBuyoutGoldLastScan
+        SolorahAuctionDatabase.TotalBidGold = SolorahAuctionDatabase.TotalBidGold and (SolorahAuctionDatabase.TotalBidGold + TotalBidGoldLastScan) or TotalBidGoldLastScan
 
         Log("Auction database updated after scan.", LOG_LEVELS.DEBUG)
     end)
