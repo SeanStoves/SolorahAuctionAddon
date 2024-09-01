@@ -1,0 +1,1 @@
+print("Norlua successfully loaded!")

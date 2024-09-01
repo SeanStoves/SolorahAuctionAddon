@@ -1,0 +1,10 @@
+# IDE settings
+.vscode/
+.idea/
+*.sln
+*.csproj
+*.userprefs
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
