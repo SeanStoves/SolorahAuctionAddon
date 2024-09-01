@@ -5,7 +5,6 @@ end
 
 -- Get the current realm name and construct a unique saved variable name for the realm
 local realm = GetRealmName()
-local savedVariableName = "SolorahAuctionDatabase_" .. realm
 
 -- Log levels
 local LOG_LEVELS = {INFO = 1, DEBUG = 2, ERROR = 3}
@@ -28,52 +27,11 @@ local function Log(message, level)
     DEFAULT_CHAT_FRAME:AddMessage("|cFF33FF99SolorahAuctionHelper:|r " .. logEntry)
 end
 
--- Function to save logs to the SolorahLogs saved variable
-local function SaveSolorahLogs()
-    SolorahLogs = SolorahLogs
-end
-
--- Function to load logs from the SolorahLogs saved variable
-local function LoadSolorahLogs()
-    if SolorahLogs then
-        Log("Solorah logs loaded.", LOG_LEVELS.DEBUG)
-    else
-        Log("No existing Solorah logs found.", LOG_LEVELS.INFO)
-    end
-end
-
--- Function to save the auction database to the global variable using the constructed name
-local function SaveAuctionDatabase()
-    _G[savedVariableName] = SolorahAuctionDatabase
-    Log("Auction database saved for realm: " .. realm)
-    SaveSolorahLogs() -- Save logs as well
-end
-
--- Function to load the auction database from the global variable, if it exists
-local function LoadAuctionDatabase()
-    if _G[savedVariableName] then
-        SolorahAuctionDatabase = _G[savedVariableName]
-        Log("Auction database loaded for realm: " .. realm)
-    else
-        Log("No existing auction database found for realm: " .. realm, LOG_LEVELS.INFO)
-    end
-end
-
 if not SolorahAuctionDatabase then
     SolorahAuctionDatabase = {}
-    LoadAuctionDatabase()
-end
-
--- Function to handle the ADDON_LOADED event, loading the auction database when the addon is loaded
-local function OnAddonLoaded()
-    Log("Addon loaded.", LOG_LEVELS.INFO)
-    LoadSolorahLogs()
-end
-
--- Function to handle the PLAYER_LOGOUT event, saving the auction database when the player logs out
-local function OnAddonUnloaded()
-    Log("Player logging out, saving auction database.", LOG_LEVELS.INFO)
-    SaveAuctionDatabase()
+    if not SolorahAuctionDatabase[realm] then
+        SolorahAuctionDatabase[realm] = {}
+    end
 end
 
 -- Create a frame to listen for events and register the necessary events
@@ -84,9 +42,9 @@ frame:RegisterEvent("PLAYER_LOGOUT") -- Listen for the player logout event
 -- Set up the event handling function to respond to the registered events
 frame:SetScript("OnEvent", function(_, event, addon)
     if event == "ADDON_LOADED" and addon == "Solorah" then
-        OnAddonLoaded()  -- Load the auction database when the addon is loaded
+        -- do stuff  -- Load the auction database when the addon is loaded
     elseif event == "PLAYER_LOGOUT" then
-        OnAddonUnloaded() -- Save the auction database when the player logs out
+        -- OnAddonUnloaded() -- Save the auction database when the player logs out
     end
 end)
 
@@ -129,37 +87,25 @@ local function CreateMainFrame()
     -- Function to update the auction database statistics
     local function UpdateAuctionStats()
         local stats = "Auction Database Statistics:\n"
-        stats = stats .. "Total Items: " .. (SolorahAuctionDatabase.TotalItems or 0) .. "\n"
-        stats = stats .. "Total Buyout Gold: " .. (SolorahAuctionDatabase.TotalBuyoutGold or 0) .. "\n"
-        stats = stats .. "Total Bid Gold: " .. (SolorahAuctionDatabase.TotalBidGold or 0) .. "\n"
-        stats = stats .. "Total Items Last Scan: " .. (SolorahAuctionDatabase.TotalItemsLastScan or 0) .. "\n"
-        stats = stats .. "Total Buyout Gold Last Scan: " .. (SolorahAuctionDatabase.TotalBuyoutGoldLastScan or 0) .. "\n"
-        stats = stats .. "Total Bid Gold Last Scan: " .. (SolorahAuctionDatabase.TotalBidGoldLastScan or 0) .. "\n"
+        stats = stats .. "Total Items: " .. (SolorahAuctionDatabase[realm].TotalItems or 0) .. "\n"
+        stats = stats .. "Total Buyout Gold: " .. (SolorahAuctionDatabase[realm].TotalBuyoutGold or 0) .. "\n"
+        stats = stats .. "Total Bid Gold: " .. (SolorahAuctionDatabase[realm].TotalBidGold or 0) .. "\n"
+        stats = stats .. "Total Items Last Scan: " .. (SolorahAuctionDatabase[realm].TotalItemsLastScan or 0) .. "\n"
+        stats = stats .. "Total Buyout Gold Last Scan: " .. (SolorahAuctionDatabase[realm].TotalBuyoutGoldLastScan or 0) .. "\n"
+        stats = stats .. "Total Bid Gold Last Scan: " .. (SolorahAuctionDatabase[realm].TotalBidGoldLastScan or 0) .. "\n"
 
         statsText:SetText(stats)
         mainFrame.scrollFrame:SetVerticalScroll(0) -- Reset the scroll position to the top
     end
 
-    -- Update the auction database statistics every 5 seconds
-    local updateTimer = C_Timer.NewTicker(5, UpdateAuctionStats)
+    -- Update the auction database statistics every 1 second
+    local updateTimer = C_Timer.NewTicker(1, UpdateAuctionStats)
 
     -- Add the scroll frame to the main frame
     mainFrame.scrollFrame = scrollFrame
     -- Set the frame's strata and ensure it is on top of other frames
     mainFrame:SetFrameStrata("HIGH")
     mainFrame:SetToplevel(true)
-
-    -- Create and configure the "Save" button
-    local saveButton = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
-    saveButton:SetSize(80, 25) -- Set the size of the button
-    saveButton:SetPoint("LEFT") -- Position the button to the left
-    saveButton:SetText("Save") -- Set the button text
-    saveButton:SetScript("OnClick", function()
-        SaveAuctionDatabase() -- Set the button's click handler to save the auction database
-        Log("Save button clicked.", LOG_LEVELS.INFO)
-    end)
-
-    mainFrame.saveButton = saveButton -- Save the reference to the save button
 
     -- Create and configure the "Scan" button
     local scanButton = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
@@ -175,19 +121,14 @@ local function CreateMainFrame()
         local TotalBuyoutGoldLastScan = 0 -- Initialize the total buyout gold for the last scan
         local TotalBidGoldLastScan = 0 -- Initialize the total bid gold for the last scan
 
-        -- Define what happens when the scan button is clicked
-        scanButton:SetScript("OnClick", function()
-            -- Update the auction database with the results of the last scan
-            SolorahAuctionDatabase.TotalItemsLastScan = (SolorahAuctionDatabase.TotalItemsLastScan or 0) + math.max(TotalItemsLastScan, 1)
-            SolorahAuctionDatabase.TotalBuyoutGoldLastScan = (SolorahAuctionDatabase.TotalBuyoutGoldLastScan or 0) + math.max(TotalBuyoutGoldLastScan, 1)
-            SolorahAuctionDatabase.TotalBidGoldLastScan = (SolorahAuctionDatabase.TotalBidGoldLastScan or 0) + math.max(TotalBidGoldLastScan, 1)
-            SolorahAuctionDatabase.TotalItems = SolorahAuctionDatabase.TotalItems and (SolorahAuctionDatabase.TotalItems + TotalItemsLastScan) or TotalItemsLastScan
-            SolorahAuctionDatabase.TotalBuyoutGold = SolorahAuctionDatabase.TotalBuyoutGold and (SolorahAuctionDatabase.TotalBuyoutGold + TotalBuyoutGoldLastScan) or TotalBuyoutGoldLastScan
-            SolorahAuctionDatabase.TotalBidGold = SolorahAuctionDatabase.TotalBidGold and (SolorahAuctionDatabase.TotalBidGold + TotalBidGoldLastScan) or TotalBidGoldLastScan
+        SolorahAuctionDatabase[realm].TotalItemsLastScan = (SolorahAuctionDatabase[realm].TotalItemsLastScan or 0) + math.max(TotalItemsLastScan, 1)
+        SolorahAuctionDatabase[realm].TotalBuyoutGoldLastScan = (SolorahAuctionDatabase[realm].TotalBuyoutGoldLastScan or 0) + math.max(TotalBuyoutGoldLastScan, 1)
+        SolorahAuctionDatabase[realm].TotalBidGoldLastScan = (SolorahAuctionDatabase[realm].TotalBidGoldLastScan or 0) + math.max(TotalBidGoldLastScan, 1)
+        SolorahAuctionDatabase[realm].TotalItems = SolorahAuctionDatabase[realm].TotalItems and (SolorahAuctionDatabase[realm].TotalItems + TotalItemsLastScan) or TotalItemsLastScan
+        SolorahAuctionDatabase[realm].TotalBuyoutGold = SolorahAuctionDatabase[realm].TotalBuyoutGold and (SolorahAuctionDatabase[realm].TotalBuyoutGold + TotalBuyoutGoldLastScan) or TotalBuyoutGoldLastScan
+        SolorahAuctionDatabase[realm].TotalBidGold = SolorahAuctionDatabase[realm].TotalBidGold and (SolorahAuctionDatabase[realm].TotalBidGold + TotalBidGoldLastScan) or TotalBidGoldLastScan
 
-            Log("Auction database updated after scan.", LOG_LEVELS.DEBUG)
-            SaveSolorahLogs() -- Save logs after updating
-        end)
+        Log("Auction database updated after scan.", LOG_LEVELS.DEBUG)
     end)
 
     mainFrame.scanButton = scanButton -- Save the reference to the scan button
@@ -214,11 +155,16 @@ end
 frame:RegisterEvent("AUCTION_HOUSE_SHOW")
 frame:SetScript("OnEvent", OnAuctionHouseShow)
 
--- Define a slash command to reload the UI
-SLASH_CRU1 = "/cru"
-SlashCmdList["CRU"] = function()
-    Log("Reload UI command issued.", LOG_LEVELS.INFO)
-    ConsoleExec("reloadui")
+-- Register the slash command
+SLASH_SOLORAH1 = "/solorah"
+SlashCmdList["SOLORAH"] = function()
+    if not mainFrame:IsShown() then -- If the main frame is not already shown
+        mainFrame:Show() -- Show the main frame
+        Log("Main frame shown.", LOG_LEVELS.DEBUG)
+    else
+        mainFrame:Hide() -- Hide the main frame
+        Log("Main frame hidden.", LOG_LEVELS.DEBUG)
+    end
 end
 
 -- Add the main frame to the list of special UI frames that can be closed with the Escape key
