@@ -1,11 +1,11 @@
 ## Interface: 110002
-## Title: Norlao The Auction Helper
+## Title: Solorah The Auction Helper
 ## Author: Solao Bajiuik
 ## Version: 1.0
 ## Notes: A tool to help you with your auction house needs.
-## SavedVariables: SolorahLogs, NorlaoAuctionDatabase
+## SavedVariables: SolorahLogs, SolorahAuctionDatabase
 
 
-Norlao.lua
+Solorah.lua
 
 FinalLoad.lua

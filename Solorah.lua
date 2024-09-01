@@ -5,7 +5,7 @@ end
 
 -- Get the current realm name and construct a unique saved variable name for the realm
 local realm = GetRealmName()
-local savedVariableName = "NorlaoAuctionDatabase_" .. realm
+local savedVariableName = "SolorahAuctionDatabase_" .. realm
 
 -- Log levels
 local LOG_LEVELS = {INFO = 1, DEBUG = 2, ERROR = 3}
@@ -25,7 +25,7 @@ local function Log(message, level)
     table.insert(SolorahLogs, logEntry)
 
     -- Output the log to the default chat frame
-    DEFAULT_CHAT_FRAME:AddMessage("|cFF33FF99NorlaoAuctionHelper:|r " .. logEntry)
+    DEFAULT_CHAT_FRAME:AddMessage("|cFF33FF99SolorahAuctionHelper:|r " .. logEntry)
 end
 
 -- Function to save logs to the SolorahLogs saved variable
@@ -44,7 +44,7 @@ end
 
 -- Function to save the auction database to the global variable using the constructed name
 local function SaveAuctionDatabase()
-    _G[savedVariableName] = NorlaoAuctionDatabase
+    _G[savedVariableName] = SolorahAuctionDatabase
     Log("Auction database saved for realm: " .. realm)
     SaveSolorahLogs() -- Save logs as well
 end
@@ -52,15 +52,15 @@ end
 -- Function to load the auction database from the global variable, if it exists
 local function LoadAuctionDatabase()
     if _G[savedVariableName] then
-        NorlaoAuctionDatabase = _G[savedVariableName]
+        SolorahAuctionDatabase = _G[savedVariableName]
         Log("Auction database loaded for realm: " .. realm)
     else
         Log("No existing auction database found for realm: " .. realm, LOG_LEVELS.INFO)
     end
 end
 
-if not NorlaoAuctionDatabase then
-    NorlaoAuctionDatabase = {}
+if not SolorahAuctionDatabase then
+    SolorahAuctionDatabase = {}
     LoadAuctionDatabase()
 end
 
@@ -83,7 +83,7 @@ frame:RegisterEvent("PLAYER_LOGOUT") -- Listen for the player logout event
 
 -- Set up the event handling function to respond to the registered events
 frame:SetScript("OnEvent", function(_, event, addon)
-    if event == "ADDON_LOADED" and addon == "Norlao" then
+    if event == "ADDON_LOADED" and addon == "Solorah" then
         OnAddonLoaded()  -- Load the auction database when the addon is loaded
     elseif event == "PLAYER_LOGOUT" then
         OnAddonUnloaded() -- Save the auction database when the player logs out
@@ -95,7 +95,7 @@ local function CreateMainFrame()
     Log("Creating main UI frame.", LOG_LEVELS.DEBUG)
     
     -- Create the main frame with a basic template and configure its properties
-    local mainFrame = CreateFrame("Frame", "NorlaoMainFrame", UIParent, "BasicFrameTemplateWithInset")
+    local mainFrame = CreateFrame("Frame", "SolorahMainFrame", UIParent, "BasicFrameTemplateWithInset")
     mainFrame:SetSize(300, 350) -- Set the size of the frame
     mainFrame:SetPoint("CENTER") -- Position the frame in the center of the screen
     mainFrame:SetMovable(true) -- Allow the frame to be moved
@@ -109,7 +109,7 @@ local function CreateMainFrame()
     -- Create the title text and set its properties
     mainFrame.title = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     mainFrame.title:SetPoint("TOPLEFT", mainFrame.TitleBg, "TOPLEFT", 5, -3)
-    mainFrame.title:SetText("Norlao Auction Helper") -- Set the title text
+    mainFrame.title:SetText("Solorah Auction Helper") -- Set the title text
 
     -- Create a scroll frame to display the auction database statistics
     local scrollFrame = CreateFrame("ScrollFrame", nil, mainFrame, "UIPanelScrollFrameTemplate")
@@ -129,12 +129,12 @@ local function CreateMainFrame()
     -- Function to update the auction database statistics
     local function UpdateAuctionStats()
         local stats = "Auction Database Statistics:\n"
-        stats = stats .. "Total Items: " .. (NorlaoAuctionDatabase.TotalItems or 0) .. "\n"
-        stats = stats .. "Total Buyout Gold: " .. (NorlaoAuctionDatabase.TotalBuyoutGold or 0) .. "\n"
-        stats = stats .. "Total Bid Gold: " .. (NorlaoAuctionDatabase.TotalBidGold or 0) .. "\n"
-        stats = stats .. "Total Items Last Scan: " .. (NorlaoAuctionDatabase.TotalItemsLastScan or 0) .. "\n"
-        stats = stats .. "Total Buyout Gold Last Scan: " .. (NorlaoAuctionDatabase.TotalBuyoutGoldLastScan or 0) .. "\n"
-        stats = stats .. "Total Bid Gold Last Scan: " .. (NorlaoAuctionDatabase.TotalBidGoldLastScan or 0) .. "\n"
+        stats = stats .. "Total Items: " .. (SolorahAuctionDatabase.TotalItems or 0) .. "\n"
+        stats = stats .. "Total Buyout Gold: " .. (SolorahAuctionDatabase.TotalBuyoutGold or 0) .. "\n"
+        stats = stats .. "Total Bid Gold: " .. (SolorahAuctionDatabase.TotalBidGold or 0) .. "\n"
+        stats = stats .. "Total Items Last Scan: " .. (SolorahAuctionDatabase.TotalItemsLastScan or 0) .. "\n"
+        stats = stats .. "Total Buyout Gold Last Scan: " .. (SolorahAuctionDatabase.TotalBuyoutGoldLastScan or 0) .. "\n"
+        stats = stats .. "Total Bid Gold Last Scan: " .. (SolorahAuctionDatabase.TotalBidGoldLastScan or 0) .. "\n"
 
         statsText:SetText(stats)
         mainFrame.scrollFrame:SetVerticalScroll(0) -- Reset the scroll position to the top
@@ -178,12 +178,12 @@ local function CreateMainFrame()
         -- Define what happens when the scan button is clicked
         scanButton:SetScript("OnClick", function()
             -- Update the auction database with the results of the last scan
-            NorlaoAuctionDatabase.TotalItemsLastScan = (NorlaoAuctionDatabase.TotalItemsLastScan or 0) + math.max(TotalItemsLastScan, 1)
-            NorlaoAuctionDatabase.TotalBuyoutGoldLastScan = (NorlaoAuctionDatabase.TotalBuyoutGoldLastScan or 0) + math.max(TotalBuyoutGoldLastScan, 1)
-            NorlaoAuctionDatabase.TotalBidGoldLastScan = (NorlaoAuctionDatabase.TotalBidGoldLastScan or 0) + math.max(TotalBidGoldLastScan, 1)
-            NorlaoAuctionDatabase.TotalItems = NorlaoAuctionDatabase.TotalItems and (NorlaoAuctionDatabase.TotalItems + TotalItemsLastScan) or TotalItemsLastScan
-            NorlaoAuctionDatabase.TotalBuyoutGold = NorlaoAuctionDatabase.TotalBuyoutGold and (NorlaoAuctionDatabase.TotalBuyoutGold + TotalBuyoutGoldLastScan) or TotalBuyoutGoldLastScan
-            NorlaoAuctionDatabase.TotalBidGold = NorlaoAuctionDatabase.TotalBidGold and (NorlaoAuctionDatabase.TotalBidGold + TotalBidGoldLastScan) or TotalBidGoldLastScan
+            SolorahAuctionDatabase.TotalItemsLastScan = (SolorahAuctionDatabase.TotalItemsLastScan or 0) + math.max(TotalItemsLastScan, 1)
+            SolorahAuctionDatabase.TotalBuyoutGoldLastScan = (SolorahAuctionDatabase.TotalBuyoutGoldLastScan or 0) + math.max(TotalBuyoutGoldLastScan, 1)
+            SolorahAuctionDatabase.TotalBidGoldLastScan = (SolorahAuctionDatabase.TotalBidGoldLastScan or 0) + math.max(TotalBidGoldLastScan, 1)
+            SolorahAuctionDatabase.TotalItems = SolorahAuctionDatabase.TotalItems and (SolorahAuctionDatabase.TotalItems + TotalItemsLastScan) or TotalItemsLastScan
+            SolorahAuctionDatabase.TotalBuyoutGold = SolorahAuctionDatabase.TotalBuyoutGold and (SolorahAuctionDatabase.TotalBuyoutGold + TotalBuyoutGoldLastScan) or TotalBuyoutGoldLastScan
+            SolorahAuctionDatabase.TotalBidGold = SolorahAuctionDatabase.TotalBidGold and (SolorahAuctionDatabase.TotalBidGold + TotalBidGoldLastScan) or TotalBidGoldLastScan
 
             Log("Auction database updated after scan.", LOG_LEVELS.DEBUG)
             SaveSolorahLogs() -- Save logs after updating
@@ -222,4 +222,4 @@ SlashCmdList["CRU"] = function()
 end
 
 -- Add the main frame to the list of special UI frames that can be closed with the Escape key
-table.insert(UISpecialFrames, "NorlaoMainFrame")
+table.insert(UISpecialFrames, "SolorahMainFrame")
